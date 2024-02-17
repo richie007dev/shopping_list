@@ -5,14 +5,11 @@ class GroceryList extends StatelessWidget {
   const GroceryList({super.key});
   @override
   Widget build(BuildContext context) {
-
-    return
-
-      Scaffold(
-        appBar: AppBar(
-          title: const Text('Your Groceries'),
-        ),
-        body: ListView.builder(
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Your Groceries'),
+      ),
+      body: ListView.builder(
         itemCount: groceryItems.length,
         itemBuilder: (ctx, index) => ListTile(
           title: Text(groceryItems[index].name),
@@ -23,7 +20,7 @@ class GroceryList extends StatelessWidget {
           ),
           trailing: Text(groceryItems[index].quantity.toString()),
         ),
-            ),
-      );
+      ),
+    );
   }
 }
