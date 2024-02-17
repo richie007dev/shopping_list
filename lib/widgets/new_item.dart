@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shopping_list/data/categories.dart';
+import 'package:shopping_list/models/category.dart';
+import 'package:shopping_list/models/grocery_item.dart';
 
 class NewItem extends StatefulWidget {
   const NewItem({super.key});
@@ -11,8 +13,20 @@ class NewItem extends StatefulWidget {
 
 class _NewItemState extends State<NewItem> {
   final _formKey = GlobalKey<FormState>();
+  var _enteredName = '';
+  var _enteredQuantity = 1;
+  var _selectedCategory = categories[Categories.vegetables]!;
   void _saveForm() {
-    _formKey.currentState!.validate();
+    if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save();
+      Navigator.of(context).pop(
+        GroceryItem(
+            id: DateTime.now().toString(),
+            name: _enteredName,
+            quantity: _enteredQuantity,
+            category: _selectedCategory),
+      );
+    }
   }
 
   @override
@@ -39,6 +53,9 @@ class _NewItemState extends State<NewItem> {
                   }
                   return null;
                 },
+                onSaved: (value) {
+                  _enteredName = value!;
+                },
               ),
               const SizedBox(
                 height: 10,
@@ -51,7 +68,7 @@ class _NewItemState extends State<NewItem> {
                       decoration: const InputDecoration(
                         label: Text('Quantity'),
                       ),
-                      initialValue: '1',
+                      initialValue: _enteredQuantity.toString(),
                       keyboardType: TextInputType.number,
                       validator: (value) {
                         if (value == null ||
@@ -62,31 +79,44 @@ class _NewItemState extends State<NewItem> {
                         }
                         return null;
                       },
+                      onSaved: (value) {
+                        _enteredQuantity = int.parse(value!);
+                      },
                     ),
                   ),
                   const SizedBox(
                     width: 8,
                   ),
                   Expanded(
-                    child: DropdownButtonFormField(items: [
-                      for (final category in categories.entries)
-                        DropdownMenuItem(
-                          value: category.value,
-                          child: Row(
-                            children: [
-                              Container(
-                                height: 16,
-                                width: 16,
-                                color: category.value.color,
-                              ),
-                              const SizedBox(
-                                width: 16,
-                              ),
-                              Text(category.value.title),
-                            ],
+                    child: DropdownButtonFormField(
+                      value: _selectedCategory,
+                      items: [
+                        for (final category in categories.entries)
+                          DropdownMenuItem(
+                            value: category.value,
+                            child: Row(
+                              children: [
+                                Container(
+                                  height: 16,
+                                  width: 16,
+                                  color: category.value.color,
+                                ),
+                                const SizedBox(
+                                  width: 16,
+                                ),
+                                Text(category.value.title),
+                              ],
+                            ),
                           ),
-                        ),
-                    ], onChanged: (value) {}),
+                      ],
+                      onChanged: (value) {
+                        setState(
+                          () {
+                            _selectedCategory = value!;
+                          },
+                        );
+                      },
+                    ),
                   ),
                 ],
               ),
