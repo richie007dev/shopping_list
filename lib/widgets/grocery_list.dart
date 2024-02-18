@@ -35,6 +35,14 @@ class _GroceryListState extends State<GroceryList> {
       });
       return;
     }
+    if (response.body == 'null') {
+      setState(
+        () {
+          _isLoading = false;
+        },
+      );
+      return;
+    }
     final Map<String, dynamic> listData = json.decode(response.body);
     for (final item in listData.entries) {
       final category = categories.entries
@@ -79,7 +87,7 @@ class _GroceryListState extends State<GroceryList> {
     final url = Uri.https('shopping-list-831b0-default-rtdb.firebaseio.com',
         'shopping-list/${item.id}.json');
     final response = await http.delete(url);
-    if(response.statusCode >= 400){
+    if (response.statusCode >= 400) {
       setState(() {
         _text = 'Item not deleted';
         _groceryItems.insert(itemIndex, item);
@@ -88,7 +96,7 @@ class _GroceryListState extends State<GroceryList> {
 
     ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context).showSnackBar(
-       SnackBar(
+      SnackBar(
         backgroundColor: Colors.redAccent,
         content: Text(_text),
         duration: const Duration(seconds: 3),
