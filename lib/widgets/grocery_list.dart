@@ -15,7 +15,7 @@ class GroceryList extends StatefulWidget {
 class _GroceryListState extends State<GroceryList> {
   List<GroceryItem> _groceryItems = [];
   var _isLoading = true;
-  var _errorMessage = null;
+  String? _errorMessage;
   @override
   void initState() {
     super.initState();
@@ -177,7 +177,7 @@ class _GroceryListState extends State<GroceryList> {
     }
     if (_errorMessage != null) {
       content = Center(
-        child: Text(_errorMessage),
+        child: Text(_errorMessage!),
       );
     }
     return Scaffold(
