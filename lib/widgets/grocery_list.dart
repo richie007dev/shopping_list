@@ -15,6 +15,7 @@ class GroceryList extends StatefulWidget {
 class _GroceryListState extends State<GroceryList> {
   List<GroceryItem> _groceryItems = [];
   var _isLoading = true;
+  var _errorMessage = null;
   @override
   void initState() {
     super.initState();
@@ -25,9 +26,15 @@ class _GroceryListState extends State<GroceryList> {
     final url = Uri.https('shopping-list-831b0-default-rtdb.firebaseio.com',
         'shopping-list.json');
     final response = await http.get(url);
-    print(response.body);
+    print(response.statusCode);
 
     final List<GroceryItem> loadedItems = [];
+    if (response.statusCode >= 400) {
+      setState(() {
+        _errorMessage = 'Failed to fetch data! please try again.';
+      });
+      return;
+    }
     final Map<String, dynamic> listData = json.decode(response.body);
     for (final item in listData.entries) {
       final category = categories.entries
@@ -63,26 +70,40 @@ class _GroceryListState extends State<GroceryList> {
     });
   }
 
-  void _deleteItem(GroceryItem item) {
+  void _deleteItem(GroceryItem item) async {
+    var _text = 'Item Deleted';
     final itemIndex = _groceryItems.indexOf(item);
     setState(() {
       _groceryItems.removeAt(itemIndex);
     });
+    final url = Uri.https('shopping-list-831b0-default-rtdb.firebaseio.com',
+        'shopping-list/${item.id}.json');
+    final response = await http.delete(url);
+    if(response.statusCode >= 400){
+      setState(() {
+        _text = 'Item not deleted';
+        _groceryItems.insert(itemIndex, item);
+      });
+    }
+
     ScaffoldMessenger.of(context).clearSnackBars();
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: const Text('Item Deleted'),
-      duration: const Duration(seconds: 3),
-      action: SnackBarAction(
-        label: 'Undo',
-        onPressed: () {
-          setState(
-            () {
-              _groceryItems.insert(itemIndex, item);
-            },
-          );
-        },
+    ScaffoldMessenger.of(context).showSnackBar(
+       SnackBar(
+        backgroundColor: Colors.redAccent,
+        content: Text(_text),
+        duration: const Duration(seconds: 3),
+        // action: SnackBarAction(
+        //   label: 'Undo',
+        //   onPressed: () {
+        //     setState(
+        //       () {
+        //         _groceryItems.insert(itemIndex, item);
+        //       },
+        //     );
+        //   },
+        // ),
       ),
-    ));
+    );
   }
 
   @override
@@ -138,6 +159,11 @@ class _GroceryListState extends State<GroceryList> {
             trailing: Text(_groceryItems[index].quantity.toString()),
           ),
         ),
+      );
+    }
+    if (_errorMessage != null) {
+      content = Center(
+        child: Text(_errorMessage),
       );
     }
     return Scaffold(
